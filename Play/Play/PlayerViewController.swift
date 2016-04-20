@@ -24,6 +24,9 @@ class PlayerViewController: UIViewController {
     var artistLabel: UILabel!
     var titleLabel: UILabel!
     
+    var playingSongForFirstTime:Bool = true
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view = UIView(frame: UIScreen.mainScreen().bounds)
@@ -130,6 +133,21 @@ class PlayerViewController: UIViewController {
         let track = tracks[currentIndex]
         let url = NSURL(string: "https://api.soundcloud.com/tracks/\(track.id)/stream?client_id=\(clientID)")!
         // FILL ME IN
+        if (playingSongForFirstTime) {
+            // The song is being played for the first time
+            let song = AVPlayerItem(URL: url)
+            self.player = AVPlayer(playerItem: song)
+            playingSongForFirstTime = false
+        }
+        if player.rate == 1 {
+            // if song is playing, you can pause it
+            player.pause()
+            sender.selected = !sender.selected
+        } else {
+            // if song is paused, you can play it
+            player.play()
+            sender.selected = !sender.selected
+        }
     
     }
     
@@ -140,6 +158,21 @@ class PlayerViewController: UIViewController {
      * Remember to update the currentIndex
      */
     func nextTrackTapped(sender: UIButton) {
+        if currentIndex + 1 < tracks.count {
+            currentIndex = currentIndex + 1
+            let path = NSBundle.mainBundle().pathForResource("Info", ofType: "plist")
+            let clientID = NSDictionary(contentsOfFile: path!)?.valueForKey("client_id") as! String
+            let track = tracks[currentIndex]
+            let url = NSURL(string: "https://api.soundcloud.com/tracks/\(track.id)/stream?client_id=\(clientID)")!
+            
+            let song = AVPlayerItem(URL: url)
+            self.player = AVPlayer(playerItem: song)
+            if (player.rate != 1) {
+                player.play()
+            }
+        }
+        
+        loadTrackElements()
     
     }
 
